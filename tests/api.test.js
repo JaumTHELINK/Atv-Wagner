@@ -80,6 +80,28 @@ describe('API de gerenciamento de tarefas', () => {
     expect(bloquear.body.mensagem).toMatch(/Limite/i);
   });
 
+  it('deve rejeitar usuário com email inválido', async () => {
+    const resposta = await request(app)
+      .post('/api/usuarios')
+      .send({ nome: 'João', email: 'email-invalido' });
+
+    expect(resposta.status).toBe(400);
+    expect(resposta.body).toHaveProperty('detalhes');
+  });
+
+  it('deve rejeitar tarefa com campos vazios ou sem usuário', async () => {
+    const usuario = await request(app)
+      .post('/api/usuarios')
+      .send({ nome: 'Ana', email: 'ana@email.com' });
+
+    const resposta = await request(app)
+      .post('/api/tarefas')
+      .send({ usuarioId: usuario.body.id, titulo: '', descricao: 'Tarefa incompleta' });
+
+    expect(resposta.status).toBe(400);
+    expect(resposta.body).toHaveProperty('detalhes');
+  });
+
   it('deve atualizar e excluir uma tarefa', async () => {
     const usuario = await request(app)
       .post('/api/usuarios')
