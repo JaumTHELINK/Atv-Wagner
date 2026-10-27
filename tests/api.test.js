@@ -27,6 +27,46 @@ describe('API de gerenciamento de tarefas', () => {
     expect(resposta.body.email).toBe('joao@email.com');
   });
 
+  it('deve buscar usuário pelo nome via query string e via rota', async () => {
+    await request(app)
+      .post('/api/usuarios')
+      .send({ nome: 'Carlos Silva', email: 'carlos@email.com' });
+
+    await request(app)
+      .post('/api/usuarios')
+      .send({ nome: 'Carla Dias', email: 'carla@email.com' });
+
+    await request(app)
+      .post('/api/usuarios')
+      .send({ nome: 'Lucas Santos', email: 'lucas@email.com' });
+
+    // Busca via query param
+    const buscaQuery = await request(app).get('/api/usuarios?nome=Carl');
+    expect(buscaQuery.status).toBe(200);
+    expect(Array.isArray(buscaQuery.body)).toBe(true);
+    expect(buscaQuery.body).toHaveLength(2);
+    expect(buscaQuery.body.map((u) => u.nome)).toEqual(
+      expect.arrayContaining(['Carlos Silva', 'Carla Dias'])
+    );
+
+    // Busca via path param
+    const buscaPath = await request(app).get('/api/usuarios/nome/Lucas');
+    expect(buscaPath.status).toBe(200);
+    expect(Array.isArray(buscaPath.body)).toBe(true);
+    expect(buscaPath.body).toHaveLength(1);
+    expect(buscaPath.body[0].nome).toBe('Lucas Santos');
+
+    // Busca sem resultado
+    const buscaVazia = await request(app).get('/api/usuarios?nome=NaoExiste');
+    expect(buscaVazia.status).toBe(200);
+    expect(buscaVazia.body).toEqual([]);
+
+    // Listar todos os usuários quando nome não for fornecido
+    const todos = await request(app).get('/api/usuarios');
+    expect(todos.status).toBe(200);
+    expect(todos.body.length).toBe(3);
+  });
+
   it('deve criar tarefas vinculadas a um usuário e listar todas', async () => {
     const usuario = await request(app)
       .post('/api/usuarios')
@@ -34,11 +74,19 @@ describe('API de gerenciamento de tarefas', () => {
 
     const tarefa1 = await request(app)
       .post('/api/tarefas')
-      .send({ usuarioId: usuario.body.id, titulo: 'Estudar Node', descricao: 'Revisar Express' });
+      .send({
+        usuarioId: usuario.body.id,
+        titulo: 'Estudar Node',
+        descricao: 'Revisar Express',
+      });
 
     const tarefa2 = await request(app)
       .post('/api/tarefas')
-      .send({ usuarioId: usuario.body.id, titulo: 'Pagar contas', descricao: 'Mensalidades' });
+      .send({
+        usuarioId: usuario.body.id,
+        titulo: 'Pagar contas',
+        descricao: 'Mensalidades',
+      });
 
     expect(tarefa1.status).toBe(201);
     expect(tarefa2.status).toBe(201);
@@ -80,6 +128,32 @@ describe('API de gerenciamento de tarefas', () => {
     expect(bloquear.body.mensagem).toMatch(/Limite/i);
   });
 
+  it('deve rejeitar usuário com email inválido', async () => {
+    const resposta = await request(app)
+      .post('/api/usuarios')
+      .send({ nome: 'João', email: 'email-invalido' });
+
+    expect(resposta.status).toBe(400);
+    expect(resposta.body).toHaveProperty('detalhes');
+  });
+
+  it('deve rejeitar tarefa com campos vazios ou sem usuário', async () => {
+    const usuario = await request(app)
+      .post('/api/usuarios')
+      .send({ nome: 'Ana', email: 'ana@email.com' });
+
+    const resposta = await request(app)
+      .post('/api/tarefas')
+      .send({
+        usuarioId: usuario.body.id,
+        titulo: '',
+        descricao: 'Tarefa incompleta',
+      });
+
+    expect(resposta.status).toBe(400);
+    expect(resposta.body).toHaveProperty('detalhes');
+  });
+
   it('deve atualizar e excluir uma tarefa', async () => {
     const usuario = await request(app)
       .post('/api/usuarios')
@@ -87,7 +161,11 @@ describe('API de gerenciamento de tarefas', () => {
 
     const tarefa = await request(app)
       .post('/api/tarefas')
-      .send({ usuarioId: usuario.body.id, titulo: 'Tarefa antiga', descricao: 'Texto antigo' });
+      .send({
+        usuarioId: usuario.body.id,
+        titulo: 'Tarefa antiga',
+        descricao: 'Texto antigo',
+      });
 
     const atualizar = await request(app)
       .put(`/api/tarefas/${tarefa.body.id}`)

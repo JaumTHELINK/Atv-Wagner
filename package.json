@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "swagger": "node swagger.js",
+    "dev": "npm run swagger && nodemon src/server.js",
     "test": "jest --runInBand",
     "lint": "eslint . --ext .js",
     "format": "prettier --write ."
@@ -22,13 +23,16 @@
   "dependencies": {
     "express": "^5.2.1",
     "sequelize": "^6.37.8",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "^6.0.1",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "eslint": "^10.10.0",
     "jest": "^30.5.1",
     "nodemon": "^3.1.14",
     "prettier": "^3.9.6",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "swagger-autogen": "^2.23.7",
+    "zod": "^4.6.5"
   }
 }
