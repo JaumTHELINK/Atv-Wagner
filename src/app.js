@@ -1,6 +1,11 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
-const swaggerFile = require('../swagger-output.json');
+let swaggerFile = {};
+try {
+  swaggerFile = require('../swagger-output.json');
+} catch {
+  // swagger-output.json will be loaded when generated
+}
 const routes = require('./routes');
 
 const app = express();

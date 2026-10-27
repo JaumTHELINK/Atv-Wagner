@@ -4,6 +4,7 @@ const UsuarioRepository = require('../infrastructure/repositories/UsuarioReposit
 const TarefaRepository = require('../infrastructure/repositories/TarefaRepository');
 
 const CriarUsuarioService = require('../application/services/CriarUsuarioService');
+const BuscarUsuarioPorNomeService = require('../application/services/BuscarUsuarioPorNomeService');
 const ListarTarefasService = require('../application/services/tarefas/ListarTarefasService');
 const CriarTarefaService = require('../application/services/tarefas/CriarTarefaService');
 const AtualizarTarefaService = require('../application/services/tarefas/AtualizarTarefaService');
@@ -12,19 +13,31 @@ const IniciarTarefaService = require('../application/services/tarefas/IniciarTar
 
 const UsuarioController = require('../interfaces/controllers/UsuarioController');
 const TarefaController = require('../interfaces/controllers/TarefaController');
-const { validarUsuario, validarTarefa } = require('../interfaces/middlewares/validarSchema');
+const {
+  validarUsuario,
+  validarTarefa,
+} = require('../interfaces/middlewares/validarSchema');
 
 const usuarioRepository = new UsuarioRepository();
 const tarefaRepository = new TarefaRepository();
 
 const criarUsuarioService = new CriarUsuarioService({ usuarioRepository });
+const buscarUsuarioPorNomeService = new BuscarUsuarioPorNomeService({
+  usuarioRepository,
+});
 const listarTarefasService = new ListarTarefasService({ tarefaRepository });
-const criarTarefaService = new CriarTarefaService({ tarefaRepository, usuarioRepository });
+const criarTarefaService = new CriarTarefaService({
+  tarefaRepository,
+  usuarioRepository,
+});
 const atualizarTarefaService = new AtualizarTarefaService({ tarefaRepository });
 const excluirTarefaService = new ExcluirTarefaService({ tarefaRepository });
 const iniciarTarefaService = new IniciarTarefaService({ tarefaRepository });
 
-const usuarioController = new UsuarioController({ criarUsuarioService });
+const usuarioController = new UsuarioController({
+  criarUsuarioService,
+  buscarUsuarioPorNomeService,
+});
 const tarefaController = new TarefaController({
   listarTarefasService,
   criarTarefaService,
@@ -56,6 +69,41 @@ router.post(
   */
   validarUsuario,
   usuarioController.criar.bind(usuarioController)
+);
+
+router.get(
+  '/usuarios',
+  /*
+   #swagger.tags = ['Usuários']
+   #swagger.summary = 'Busca usuários por nome ou lista todos'
+   #swagger.description = 'Retorna a lista de usuários filtrados pelo parâmetro "nome" na query string, ou todos se omitido.'
+   #swagger.parameters['nome'] = {
+     in: 'query',
+     description: 'Nome do usuário para busca (opcional)',
+     required: false,
+     type: 'string'
+   }
+   #swagger.responses[200] = { description: 'Lista de usuários retornada com sucesso.' }
+  */
+  usuarioController.buscarPorNome.bind(usuarioController)
+);
+
+router.get(
+  '/usuarios/nome/:nome',
+  /*
+   #swagger.tags = ['Usuários']
+   #swagger.summary = 'Busca usuários por nome via parâmetro de rota'
+   #swagger.description = 'Retorna usuários cujo nome contenha o valor informado.'
+   #swagger.parameters['nome'] = {
+     in: 'path',
+     name: 'nome',
+     description: 'Nome do usuário',
+     required: true,
+     type: 'string'
+   }
+   #swagger.responses[200] = { description: 'Lista de usuários retornada com sucesso.' }
+  */
+  usuarioController.buscarPorNome.bind(usuarioController)
 );
 
 router.get(

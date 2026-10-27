@@ -1,21 +1,25 @@
 # API RESTful de Gerenciamento de Tarefas
 
 ## Alunos
+
 - João Victor do Nascimento Silva (JaumThelink o Grande)
 - Igor Holanda Costa
 
 ## Descrição do Projeto
+
 Este projeto foi desenvolvido como parte de uma atividade prática de construção de uma API RESTful utilizando a arquitetura Clean Architecture. A aplicação tem como objetivo gerenciar tarefas associadas a usuários, com persistência em banco SQLite usando Sequelize.
 
 A estrutura do projeto foi organizada para respeitar a separação de responsabilidades entre domínio, aplicação, infraestrutura e interfaces, seguindo os princípios da Clean Architecture e da regra de dependência.
 
 ## Objetivos
+
 - Criar uma API RESTful para gerenciamento de tarefas;
 - Separar regras de negócio, persistência e interface HTTP;
 - Aplicar boas práticas de organização e manutenção de código;
 - Validar a lógica da aplicação com testes automatizados.
 
 ## Tecnologias Utilizadas
+
 - Node.js
 - Express
 - Sequelize
@@ -27,6 +31,7 @@ A estrutura do projeto foi organizada para respeitar a separação de responsabi
 - Nodemon
 
 ## Estrutura do Projeto
+
 ```text
 src/
 ├── app.js
@@ -40,6 +45,7 @@ src/
 ├── application/
 │   └── services/
 │       ├── CriarUsuarioService.js
+│       ├── BuscarUsuarioPorNomeService.js
 │       └── tarefas/
 │           ├── ListarTarefasService.js
 │           ├── CriarTarefaService.js
@@ -64,7 +70,9 @@ src/
 ```
 
 ## Funcionalidades
+
 - Cadastro de usuários;
+- Busca de usuários por nome (via query parameter ou rota);
 - Criação de tarefas vinculadas a usuários;
 - Listagem de todas as tarefas;
 - Atualização de tarefas;
@@ -74,6 +82,7 @@ src/
 - Persistência em banco SQLite.
 
 ## Regras de Negócio
+
 - O título da tarefa é obrigatório;
 - O status inicial da tarefa é `PENDENTE`;
 - A tarefa só pode ser iniciada se não houver limite de 5 tarefas em andamento para o usuário;
@@ -82,25 +91,36 @@ src/
 - Usuários devem ter nome e e-mail válidos.
 
 ## Como Executar
+
 1. Abra o terminal na pasta do projeto.
 2. Instale as dependências:
+
 ```bash
 npm install
 ```
+
 3. Inicie a aplicação:
+
 ```bash
 npm start
 ```
+
 4. A API ficará disponível em:
+
 ```text
 http://localhost:3000
 ```
 
 ## Endpoints
+
 ### Usuários
-- `POST /api/usuarios`
+
+- `POST /api/usuarios` (cria usuário)
+- `GET /api/usuarios?nome=Nome` (busca usuários por nome ou lista todos se omitido)
+- `GET /api/usuarios/nome/:nome` (busca usuários por nome via path parameter)
 
 ### Tarefas
+
 - `GET /api/tarefas`
 - `POST /api/tarefas`
 - `PUT /api/tarefas/:id`
@@ -108,11 +128,13 @@ http://localhost:3000
 - `POST /api/tarefas/:id/iniciar`
 
 ## Como Testar
+
 ```bash
 npm test
 ```
 
 ## Checklist de Apresentação para o Professor
+
 - [ ] Projeto inicializado com `npm init -y`;
 - [ ] Repositório Git inicializado com `git init`;
 - [ ] Dependências de produção instaladas corretamente;
@@ -136,7 +158,9 @@ npm test
 - [ ] Projeto foi versionado e está pronto para entrega.
 
 ## Observações
+
 Este projeto foi desenvolvido para atender ao requisito da atividade acadêmica, com foco em organização, separação de responsabilidades e validação funcional por testes.
 
 ## Conclusão
+
 A API está estruturada de forma modular e escalável, respeitando os princípios da Clean Architecture e demonstrando o uso prático de ORM, casos de uso e controllers no desenvolvimento de uma solução RESTful.
